@@ -79,8 +79,77 @@ void setup() {
 
 //#######################################################################################################
 void loop() {
-  
-
+   /*
+   * Menghitung Rata-rata nilai pH dalam array
+   * Setiap Sesekali menghitung nilai sampel pH pada tiap index dalam array dan menghitung rata-rata
+   */
+   if(millis()-pHsamplingTime > pHsamplingInterval)            //Jika pHsamplingTime > 1000 mili detik
+  {
+      pHArray[pHArrayIndex++]=analogRead(SensorPin);           //Maka nilai analog dari sensor pH dibaca mulai dari index pertama sampai terakhir
+      if(pHArrayIndex==ArrayLenth)pHArrayIndex=0;              //Jika sudah terbaca ada 40 index data yang masuk, maka index dikembalikan ke posisi awal 
+      pHvoltage = avergearray(pHArray, ArrayLenth)*5.0/1024;   //Rumus menghitung tegangan pH dimana nilai pHarray dan ArrayLenth dihitung dalam fungsi avergearray()
+      pHValue = 3.5*pHvoltage+Offset;                          //Rumus menghitung nilai pH
+      pHsamplingTime=millis();                                 //Nilai pHsamplingTime dikembalikan pada kondisi awal yaitu 0 mili detik
+  }
+  /*
+   * Menghitung Rata-rata nilai analog EC dalam array
+   * Setiap Sesekali menghitung nilai sampel analog EC pada tiap index dalam array dan menghitung rata-rata
+   */
+  if(millis()-AnalogSampleTime>=AnalogSampleInterval)         //Jika AnalogSampleTime >= 50 mili detik
+  {
+    AnalogSampleTime=millis();                                //Maka AnalogSampleTime = 0 mili deitk
+    readings[index] = analogRead(ECsensorPin);                //Readings[index] membaca hasil analog index ke ...
+    AnalogValueTotal = AnalogValueTotal + readings[index];    //Menghitung jumlah total analog yang terbaca dari total readings[index] yang terbaca
+    index = index + 1;                                        //Maju ke posisi index berikutnya dalam array
+    if (index >= numReadings)                                 //Jika posisi index sudah mencapai akhir dari jumlah index dalam array >= 20
+    index = 0;                                                //Kembalikan nilai index ke 0
+    AnalogAverage = AnalogValueTotal / numReadings;           //Menghitung rata-rata Analog yang terbaca dari dalam array
+    averageVoltage = AnalogAverage*5000/1024;                 //Hasil nilai penghitungan rata-rata tegangan yang dihasilkan dari analog (mV)
+    CoefficientVolatge = averageVoltage;                      //CoefficientVoltage = tegangan (mV)
+    if(CoefficientVolatge<150 && CoefficientVolatge>=596){    //Jika nilai tegangan yang terbaca <150 mV dan >= 596 mV
+      ECcurrent=0;                                            //Maka nilai EC dikembalikan ke 0
+    }
+    else                                                      //Jika tidak atau lainnya
+    { 
+      ECcurrent=6.84*CoefficientVolatge-64.32;                 //Nilai EC terhitung dalam satuan mS/cm                     
+      ECcurrent = ECcurrent+ECOffset;                          //Nilai EC yang sesungguhnya setelah diketahui selisih dengan nilai penyimpangannya
+    }
+  }
+  /*
+   * Membaca suhu dan mengkonversi
+   * Setiap sesekali suhu dibaca dan mulai dikonversi oleh DS18B20. Namnu, interval minimum antara mulai konversi dengan mambaca suhu minimal 750 ms agar mendapat data akurat
+   */
+   if(millis()-tempSampleTime>=tempSampleInterval)            //Jika tempSampleTime >= 1000 mili detik
+  {
+    tempSampleTime=millis();                                  //Maka tempSampleTime = 0 mili detik
+    temperature = TempProcess(ReadTemperature);               //Baca suhu sekarang dari sensor DS18B20
+    TempProcess(StartConvert);                                //konversi hasil bacaan suhu sensor DS18B20 dari data biner menjadi float
+  }
+   /*
+    * Tampilan hasil pembacaan pH, EC, dan suhu
+    * Mencetak hasil pengukuran dalam serial monitor dan ecxel untuk rekapan data kalibrasi pH, EC, dan suhu
+   */
+   if(millis()- pHprintTime >= pHprintInterval && millis()-printTime>=printInterval)  //jika pHprintTime >= 1000 mili detik & printTime >= 1000 mili detik
+   {
+   printTime=millis();                                     //Maka prinTime dikembalikan ke fungsi millis() awal
+   pHprintTime=millis();                                   //Maka pHprinTime dikembalikan ke fungsi millis() awal        
+   pHvoltage = pHvoltage*1000;                             //Membuat nilai tegangan pH dari V menjadi mV    
+   Serial.print("DATA,TIME,");                             //Digunakan untuk menghubungkan antara plxdiag dengan arduino
+// 1. Print Out Tegangan Suhu dan Suhu                     
+      Serial.print((int)pHvoltage);                      //Print out tegangan pH dalam mV dengan tipe data integer
+      Serial.print(",");
+      Serial.print(pHValue,2);                             //Print out hasil nilai pH (dua desimal)
+// 2. Print Out Tegangan EC dan EC
+      Serial.print(",");
+      Serial.print(averageVoltage);                      //Print out tegangan EC dalam mV
+      Serial.print(",");
+      Serial.print(ECcurrent,2);                           //Print out hasil nilai EC (dua desimal)
+//  3. Print Out Nilai Suhu
+      Serial.print(",");
+      Serial.print(temperature,2);                         //Print out hasil nilai temperature atau suhu (Celcius)
+      Serial.print(",");
+      Serial.println("");                                  //Print out untuk membuat baris baru
+  }
 }
 //#######################################################################################################
 
