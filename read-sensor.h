@@ -33,6 +33,20 @@ float CoefficientVolatge;                 //Koefisien votage yang digunakan untu
 float averageVoltage=0;                   //Hasil tegangan EC dengan tipe data berupa float
 float ECcurrent;                          //Tipe dan untuk hasil nilai EC berupa float
 
+/*
+ * Deklarasi Suhu DS18B20
+ * Digunakan untuk menentukan tipe variabel dan penentuan pin input Suhu DS18B20
+ */
+#include <OneWire.h>                      //Modul Sensor Suhu
+#define StartConvert 0                    //Memulai mengkonversi hasil pembacaan suhu dari sensor 
+#define ReadTemperature 1                 //Memulai pengukuran hasil pembacaan suhu dari sensor 
+#define DS18B20_Pin 2                     //Pin Digital 2 untuk sensor suhu DS18B20
+unsigned int tempSampleInterval=1000;     //Interval waktu pembacaan suhu
+unsigned long tempSampleTime;             //Deklarasi variabel tempSampleTime
+float temperature;                        //Tipe data untuk hasil nilai suhu berupa float
+OneWire ds(DS18B20_Pin);                  //(Modul tamabahan)Temperature chip i/o pada digital input 2
+
+
 void setup() {
   // put your setup code here, to run once:
 
