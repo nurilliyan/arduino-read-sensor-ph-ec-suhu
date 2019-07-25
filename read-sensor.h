@@ -80,3 +80,46 @@ void loop() {
   // put your main code here, to run repeatedly:
 
 }
+
+
+//#######################################################################################################
+/*
+ * Fungsi avergearray()
+ * Untuk membaca hasil pengukuran suhu yang masuk dalam Arduino dalam bentuk bit
+*/
+float TempProcess(bool ch)
+{
+  //returns the temperature from one DS18B20 in DEG Celsius
+  static byte data[12];
+  static byte addr[8];
+  static float TemperatureSum;
+  if(!ch){
+          if ( !ds.search(addr)) {
+              ds.reset_search();
+              return 0;
+          }      
+          if ( OneWire::crc8( addr, 7) != addr[7]) {
+              return 0;
+          }        
+          if ( addr[0] != 0x10 && addr[0] != 0x28) {
+              return 0;
+          }      
+          ds.reset();
+          ds.select(addr);
+          ds.write(0x44,1); 
+  }
+  else{  
+          byte present = ds.reset();
+          ds.select(addr);    
+          ds.write(0xBE); 
+          for (int i = 0; i < 9; i++) {
+            data[i] = ds.read();
+          }         
+          ds.reset_search();           
+          byte MSB = data[1];
+          byte LSB = data[0];        
+          float tempRead = ((MSB << 8) | LSB); 
+          TemperatureSum = tempRead / 16;
+    }
+          return TemperatureSum;  
+}
