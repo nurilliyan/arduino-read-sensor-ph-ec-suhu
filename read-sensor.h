@@ -47,10 +47,34 @@ float temperature;                        //Tipe data untuk hasil nilai suhu ber
 OneWire ds(DS18B20_Pin);                  //(Modul tamabahan)Temperature chip i/o pada digital input 2
 
 
+//#######################################################################################################
 void setup() {
-  // put your setup code here, to run once:
-
+  Serial.begin(9600);                 // Serial komunikasi atau baud rate
+  /*
+  * Print Out Ke Dalam Excel
+  * Excel yang digunakan merupakan workbook dari plxdag, dimana didalam excel dapat langsung membaca hasil kalibrasi sensor
+  */
+  Serial.println("CLEARDATA");
+  Serial.println("LABEL, Waktu, Nilai Tegangan pH, Nilai pH, Nilai Tegangan EC, Niali EC, Nilai Suhu");
+  Serial.println("RESETTIMER");
+  /*
+  * Inisilisasi pH
+  * Menginisilisaasi variabel
+  */
+  pHsamplingTime=millis();           //pHsamplingTime dijalankan dengan fungsi millis() dari 0 mili detik
+  pHprintTime=millis();              //pHprintTime dijalankan dengan fungsi millis() dari 0 mili detik
+  /*
+  * Inisilisasi EC dan Suhu
+  * Menginisilisaasi semua baccan ke millis() = 0
+  */
+  for (byte thisReading = 0; thisReading < numReadings; thisReading++)     //Mulai Looping dimana (thisReading=0; thisReading<20; thisReading++)
+    readings[thisReading] = 0;                                             //readings[thisReading] dimulai dari index 0 atau readings[0]       
+  TempProcess(StartConvert);                                               //Memulai konversi sensor suhu DS18B20 dari 12 bit yang terbaca
+  AnalogSampleTime=millis();                                               //AnalogSampleTime dijalankan dengan fungsi millis() dari 0 mili detik
+  printTime=millis();                                                      //printTime dijalankan dengan fungsi millis() dari 0 mili detik
+  tempSampleTime=millis();                                                 //tempSampleTime dijalankan dengan fungsi millis() dari 0 mili detik
 }
+//#######################################################################################################
 
 void loop() {
   // put your main code here, to run repeatedly:
