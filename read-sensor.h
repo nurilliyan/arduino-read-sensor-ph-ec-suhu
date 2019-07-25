@@ -80,3 +80,48 @@ void loop() {
   // put your main code here, to run repeatedly:
 
 }
+
+
+//#######################################################################################################
+/*
+ * Fungsi avergearray()
+ * Untuk menghitung rata-rata jumlah analog yang masuk pada pH
+ */
+double avergearray(int* arr, int number){        //Membaca & mengenmbalikan nilai (arr = pHarray) & (number = arrayLenth)
+  int i;                                         //Deklarasi variabel i dengan tipe data integer
+  int max,min;                                   //Deklarasi variael min & max dengan tipe data integer
+  double avg;                                    //Deklarasi variabel avg (average) dengan tipe data double
+  long amount=0;                                 //Deklarasi variabel amount dengan tipe data long
+  if(number<=0){                                 //Kemungkinan 1. Jika panjang data index (number) terbaca <= 0
+    return 0;                                    //Maka nilai dikemablikan ke 0 (karna tidak ada data yang terbaca dari sennsor)
+  }
+  if(number<5){                                  //Kemungkinan 2. Jika panjang data index (number) terbaca < 5
+    for(i=0;i<number;i++){                       //Maka lakukan Looping dimulai dari i=0 sampai i=4 (ada maksimal 5 index yang terbaca)
+      amount+=arr[i];                            //Maka nilai hasil analog pembacaan sensor (amount) ditambah mulai i=0 sampai i=4
+    }
+    avg = amount/number;                         //Maka nilai hasil rata-rata analog yang terbaca amount/number
+    return avg;
+  }else{                                         //Jika tidak masuk di kemungkinan 1 & 2 maka lanjut ke kemungkinan ke 3 
+    if(arr[0]<arr[1]){                           //Jika nilai pembacaan analog pH index[0] < index[1]
+      min = arr[0];max=arr[1];                   //Maka nilai min = hasil analog index[0]  & nilai max = hasil analog index[1]
+    }
+    else{                                        //Jika nilai pembacaan analog pH index[0] tidak < index[1]
+      min=arr[1];max=arr[0];                     //Maka nilai min = hasil analog index[1]  & nilai max = hasil analog index[0]
+    }
+    for(i=2;i<number;i++){                       //Looping untuk i dimulai dari 2 & i < total index yang terbaca oleh sensor (number)
+      if(arr[i]<min){                            //Jika hasil analog index ke i < nilai min (arr < min)
+        amount+=min;                             //Maka amount = min
+        min=arr[i];                              //Maka nilai min = nilai minimal yang terbaca pada index ke [i]
+      }else {                                    
+        if(arr[i]>max){                          //Jika hasi analog index ke i > nilai max (arr > max)
+          amount+=max;                           //Maka amount = max
+          max=arr[i];                            //Maka nilai max = nilai maximal yang terbaca pada index ke [i]
+        }else{
+          amount+=arr[i];                        //min<=arr<=max        
+        }
+      }
+    }
+    avg = (double)amount/(number-2);             //Nilai rata-rata analog diperoleh dari (nilai minimal + nilai maksimal) / jumlah data
+  }
+  return avg;                                    //Return atau kembalikan nilai rata-rata analog yang masuk dari sensor (avg)
+}
